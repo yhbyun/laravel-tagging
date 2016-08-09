@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  */
 class Tagged extends Eloquent
 {
-	protected $table = 'tagging_tagged';
+	protected $table = 'tagged';
 	public $timestamps = false;
 	protected $fillable = ['tag_name', 'tag_slug'];
 	protected $taggingUtility;
@@ -16,10 +16,19 @@ class Tagged extends Eloquent
 	public function __construct(array $attributes = array())
 	{
 		parent::__construct($attributes);
-		
+
 		$this->taggingUtility = app(TaggingUtility::class);
 	}
-	
+
+	public static function boot()
+	{
+		parent::boot();
+
+		static::creating(function ($model) {
+			$model->created_at = $model->freshTimestamp();
+		});
+	}
+
 	/**
 	 * Morph to the tag
 	 *
@@ -29,7 +38,7 @@ class Tagged extends Eloquent
 	{
 		return $this->morphTo();
 	}
-	
+
 	/**
 	 * Get instance of tag linked to the tagged value
 	 *

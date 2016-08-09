@@ -31,7 +31,7 @@ trait Taggable
      * @access protected
      */
     protected $autoTagSet = false;
-	
+
 	/**
 	 * Boot the soft taggable trait for a model.
 	 *
@@ -51,7 +51,7 @@ trait Taggable
 
 		static::$taggingUtility = app(TaggingUtility::class);
 	}
-	
+
 	/**
 	 * Return collection of tagged rows related to the tagged model
 	 *
@@ -75,7 +75,7 @@ trait Taggable
 			return $item->tag;
 		});
 	}
-	
+
 	/**
 	 * Set the tag names via attribute, example $model->tag_names = 'foo, bar';
 	 *
@@ -85,7 +85,7 @@ trait Taggable
 	{
 		return implode(', ', $this->tagNames());
 	}
-	
+
 	/**
 	 * Perform the action of tagging the model with the given string
 	 *
@@ -94,12 +94,12 @@ trait Taggable
 	public function tag($tagNames)
 	{
 		$tagNames = static::$taggingUtility->makeTagArray($tagNames);
-		
+
 		foreach($tagNames as $tagName) {
 			$this->addTag($tagName);
 		}
 	}
-	
+
 	/**
 	 * Return array of the tag names related to the current model
 	 *
@@ -123,7 +123,7 @@ trait Taggable
 			return $item->tag_slug;
 		})->toArray();
 	}
-	
+
 	/**
 	 * Remove the tag from this model
 	 *
@@ -134,18 +134,18 @@ trait Taggable
 		if(is_null($tagNames)) {
 			$tagNames = $this->tagNames();
 		}
-		
+
 		$tagNames = static::$taggingUtility->makeTagArray($tagNames);
-		
+
 		foreach($tagNames as $tagName) {
 			$this->removeTag($tagName);
 		}
-		
+
 		if(static::shouldDeleteUnused()) {
 			static::$taggingUtility->deleteUnusedTags();
 		}
 	}
-	
+
 	/**
 	 * Replace the tags from this model
 	 *
@@ -155,17 +155,17 @@ trait Taggable
 	{
 		$tagNames = static::$taggingUtility->makeTagArray($tagNames);
 		$currentTagNames = $this->tagNames();
-		
+
 		$deletions = array_diff($currentTagNames, $tagNames);
 		$additions = array_diff($tagNames, $currentTagNames);
-		
+
 		$this->untag($deletions);
 
 		foreach($additions as $tagName) {
 			$this->addTag($tagName);
 		}
 	}
-	
+
 	/**
 	 * Filter model to subset with the given tags
 	 *
@@ -177,9 +177,9 @@ trait Taggable
 			$tagNames = func_get_args();
 			array_shift($tagNames);
 		}
-		
+
 		$tagNames = static::$taggingUtility->makeTagArray($tagNames);
-		
+
 		$normalizer = config('tagging.normalizer');
 		$normalizer = $normalizer ?: [static::$taggingUtility, 'slug'];
 		$className = $query->getModel()->getMorphClass();
@@ -188,14 +188,14 @@ trait Taggable
 			$tags = Tagged::where('tag_slug', call_user_func($normalizer, $tagSlug))
 				->where('taggable_type', $className)
 				->lists('taggable_id');
-		
+
 			$primaryKey = $this->getKeyName();
 			$query->whereIn($this->getTable().'.'.$primaryKey, $tags);
 		}
-		
+
 		return $query;
 	}
-		
+
 	/**
 	 * Filter model to subset with the given tags
 	 *
@@ -207,23 +207,23 @@ trait Taggable
 			$tagNames = func_get_args();
 			array_shift($tagNames);
 		}
-		
+
 		$tagNames = static::$taggingUtility->makeTagArray($tagNames);
-		
+
 		$normalizer = config('tagging.normalizer');
 		$normalizer = $normalizer ?: [static::$taggingUtility, 'slug'];
-		
+
 		$tagNames = array_map($normalizer, $tagNames);
 		$className = $query->getModel()->getMorphClass();
-		
+
 		$tags = Tagged::whereIn('tag_slug', $tagNames)
 			->where('taggable_type', $className)
 			->lists('taggable_id');
-		
+
 		$primaryKey = $this->getKeyName();
 		return $query->whereIn($this->getTable().'.'.$primaryKey, $tags);
 	}
-	
+
 	/**
 	 * Adds a single tag
 	 *
@@ -232,31 +232,31 @@ trait Taggable
 	private function addTag($tagName)
 	{
 		$tagName = trim($tagName);
-		
+
 		$normalizer = config('tagging.normalizer');
 		$normalizer = $normalizer ?: [static::$taggingUtility, 'slug'];
 
 		$tagSlug = call_user_func($normalizer, $tagName);
-		
+
 		$previousCount = $this->tagged()->where('tag_slug', '=', $tagSlug)->take(1)->count();
 		if($previousCount >= 1) { return; }
-		
+
 		$displayer = config('tagging.displayer');
 		$displayer = empty($displayer) ? '\Illuminate\Support\Str::title' : $displayer;
-		
+
 		$tagged = new Tagged(array(
 			'tag_name'=>call_user_func($displayer, $tagName),
 			'tag_slug'=>$tagSlug,
 		));
-		
+
 		$this->tagged()->save($tagged);
 
 		static::$taggingUtility->incrementCount($tagName, $tagSlug, 1);
-		
+
 		unset($this->relations['tagged']);
 		event(new TagAdded($this));
 	}
-	
+
 	/**
 	 * Removes a single tag
 	 *
@@ -265,16 +265,16 @@ trait Taggable
 	private function removeTag($tagName)
 	{
 		$tagName = trim($tagName);
-		
+
 		$normalizer = config('tagging.normalizer');
 		$normalizer = $normalizer ?: [static::$taggingUtility, 'slug'];
-		
+
 		$tagSlug = call_user_func($normalizer, $tagName);
-		
+
 		if($count = $this->tagged()->where('tag_slug', '=', $tagSlug)->delete()) {
 			static::$taggingUtility->decrementCount($tagName, $tagSlug, $count);
 		}
-		
+
 		unset($this->relations['tagged']);
 		event(new TagRemoved($this));
 	}
@@ -287,12 +287,12 @@ trait Taggable
 	public static function existingTags()
 	{
 		return Tagged::distinct()
-			->join('tagging_tags', 'tag_slug', '=', 'tagging_tags.slug')
+			->join('tag', 'tag_slug', '=', 'tag.slug')
 			->where('taggable_type', '=', (new static)->getMorphClass())
 			->orderBy('tag_slug', 'ASC')
-			->get(array('tag_slug as slug', 'tag_name as name', 'tagging_tags.count as count'));
+			->get(array('tag_slug as slug', 'tag_name as name', 'tag.cnt as count'));
 	}
-	
+
 	/**
 	 * Should untag on delete
 	 */
@@ -302,7 +302,7 @@ trait Taggable
 			? static::$untagOnDelete
 			: config('tagging.untag_on_delete');
 	}
-	
+
 	/**
 	 * Delete tags that are not used anymore
 	 */
