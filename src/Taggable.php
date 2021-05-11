@@ -309,10 +309,10 @@ trait Taggable
 
         return $model::query()
             ->distinct()
-            ->join('tagging_tags', 'tag_slug', '=', 'tagging_tags.slug')
+            ->join('tag', 'tag_slug', '=', 'tag.slug')
             ->where('taggable_type', '=', (new static)->getMorphClass())
             ->orderBy('tag_slug', 'ASC')
-            ->get(['tag_slug as slug', 'tag_name as name', 'tagging_tags.count as count']);
+            ->get(['tag_slug as slug', 'tag_name as name', 'tag.cnt as count']);
     }
 
     /**

@@ -160,7 +160,7 @@ class TaggingUtility
                 'ư' => 'u', 'Ư' => 'U', 'ứ' => 'u', 'Ứ' => 'U', 'ừ' => 'u', 'Ừ' => 'U', 'ử' => 'u', 'Ử' => 'U',
                 'ữ' => 'u', 'Ữ' => 'U', 'ự' => 'u', 'Ự' => 'U', 'ỳ' => 'y', 'Ỳ' => 'Y', 'ỷ' => 'y', 'Ỷ' => 'Y',
                 'ỹ' => 'y', 'Ỹ' => 'Y', 'ỵ' => 'y', 'Ỵ' => 'Y',
-            
+
                 //Kurdish
 				'ا' => 'a', 'ب' => 'b', 'ج' => 'c', 'د' => 'd', 'ێ' => 'ee', 'ف' => 'f', 'گ' => 'g',
 				'ژ' => 'j', 'ک' => 'k', 'ل' => 'l', 'م' => 'm', 'ن' => 'n', 'ۆ' => 'o',
@@ -214,7 +214,7 @@ class TaggingUtility
             $tag->save();
         }
 
-        $tag->count = $tag->count + $count;
+        $tag->cnt = $tag->cnt + $count;
         $tag->save();
     }
 
@@ -232,9 +232,9 @@ class TaggingUtility
         $tag = $model::where('slug', '=', $tagSlug)->first();
 
         if($tag) {
-            $tag->count = $tag->count - $count;
-            if($tag->count < 0) {
-                $tag->count = 0;
+            $tag->cnt = $tag->cnt - $count;
+            if($tag->cnt < 0) {
+                $tag->cnt = 0;
                 \Log::warning("The '.$model.' count for `$tag->name` was a negative number. This probably means your data got corrupted. Please assess your code and report an issue if you find one.");
             }
             $tag->save();

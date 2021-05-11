@@ -21,8 +21,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Tag extends Model
 {
-    protected $table = 'tagging_tags';
-    public $timestamps = false;
+    protected $table = 'tag';
+    public $timestamps = true;
     public $fillable = ['name', 'description'];
 
     /**
@@ -148,7 +148,7 @@ class Tag extends Model
     public static function deleteUnused()
     {
         return (new static)->newQuery()
-            ->where('count', '=', 0)
+            ->where('cnt', '=', 0)
             ->where('suggest', false)
             ->delete();
     }

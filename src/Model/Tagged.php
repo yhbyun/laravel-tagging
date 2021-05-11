@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Tagged extends Model
 {
-    protected $table = 'tagging_tagged';
+    protected $table = 'tagged';
     public $timestamps = false;
     protected $fillable = ['tag_name', 'tag_slug'];
 
@@ -24,6 +24,15 @@ class Tagged extends Model
         parent::__construct($attributes);
 
         $this->connection = config('tagging.connection');
+    }
+
+    public static function boot()
+	{
+		parent::boot();
+
+		static::creating(function ($model) {
+			$model->created_at = $model->freshTimestamp();
+		});
     }
 
     /**
